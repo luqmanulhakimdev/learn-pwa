@@ -5,8 +5,7 @@
   "background_color": "#389eee",
   "display": "standalone",
   "orientation": "portrait",
-  "Scope": "/",
-  "start_url": "/index.html",
+  "start_url": ".",
   "icons": [
     {
       "src": "assets/images/icons/icon-72x72.png",
