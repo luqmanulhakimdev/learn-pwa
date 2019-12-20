@@ -6,8 +6,7 @@ $(document).ready(function() {
     var deptResults = "";
     var departements = [];
 
-    $.get(url, function(data) {
-
+    function renderPage(data) {
         $.each(data, function(key, items) {
 
             _dept = items.department
@@ -29,8 +28,59 @@ $(document).ready(function() {
 
         $("#members").html(results);
         $("#dept_select").html(`<option value="all">semua</option>${deptResults}`);
+    }
 
+    var networkDataReceived = false;
+
+    // Fresh data from online
+    var networkUpdate = fetch(url).then(function(response) {
+        return response.json()
+    }).then(function(data) {
+        networkDataReceived = true;
+        renderPage(data);
     });
+
+    // Return data from cache
+    caches.match(url).then(function(response) {
+        if(!response) throw Error('No data on chache');
+        return response.json();
+    }).then(function(data) {
+        if(!networkDataReceived) {
+            renderPage(data);
+            console.log('Render data from cache');
+        }
+    }).catch(function() {
+        return networkUpdate;
+    });
+
+    // Fungsi Filter
+    $("#dept_select").on("change", function() {
+        updateMembers($(this).val())
+    });
+
+    function updateMembers(dept) {
+        
+        var results = "";
+        var newUrl = url;
+
+        if(dept != 'all')
+            newUrl = `${url}?department=${dept}`;
+
+        $.get(newUrl, function(data) {
+            $.each(data, function(key, items) {
+                _dept = items.department
+                results += `
+                    <div>
+                        <h4>${items.name}</h4>
+                        <p>Email: ${items.email} - Department: ${items.department}</p>
+                        <p>Gender: ${items.gender}</p>
+                    </div>
+                `;
+            });
+
+            $("#members").html(results);
+        });
+    }
 
 });
 
